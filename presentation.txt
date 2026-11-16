@@ -1,0 +1,64 @@
+================================================================================
+           AntiCheat Lab - Memory Modification & Reverse Engineering
+================================================================================
+
+1. Project Overview & Architecture
+--------------------------------------------------------------------------------
+- Target Application: TargetGame.exe ("AntiCheat Lab - 3D FPS Arena")
+- Engine / Framework: C++ / Raylib 5.5 (MSVC / CMake x64)
+- Modification Tool:  memory_modifcication.cpp (Standalone Windows external tool)
+
+2. Memory Allocation Concepts in Games
+--------------------------------------------------------------------------------
+A. Stack vs. Heap:
+   - Stack: Local variables inside functions (e.g. Player player;) live in the
+     thread's stack frame (RSP). They are volatile and their base address changes
+     completely with thread context.
+   - Heap: Commercial games dynamically allocate game entities using 'new' or
+     engine allocators (e.g. Player* player = new Player();).
+   - Global Pointer: Engines store pointers to game instances/worlds in static
+     global pointers (e.g. Player* g_Player;), accessible across modules.
+
+3. Reverse Engineering Process via Cheat Engine
+--------------------------------------------------------------------------------
+Step 1: Locate Current Dynamic Address
+   - Value Type: 4 Bytes (Signed integer)
+   - Scan for current score (0) -> Trigger in-game event (+100) -> Next Scan (100).
+   - Filter down to the exact memory address of Player.score.
+
+Step 2: Disassembly & Offset Identification
+   - Use Cheat Engine's debugger ("Find out what writes/accesses this address").
+   - Identified instruction:
+       mov rax, [TargetGame.g_Player]   ; TargetGame.exe + 0x270A78
+       mov eax, [rax + 0x10]            ; 0x10 (16 bytes) = Player.score offset
+
+Step 3: Calculating Static Base Offset
+   - Address of g_Player:    0x7FF76D960A78
+   - TargetGame Base:        0x7FF76D6F0000
+   - Static Pointer Offset:  0x7FF76D960A78 - 0x7FF76D6F0000 = 0x270A78
+
+4. Multi-Level Pointer Chain
+--------------------------------------------------------------------------------
+To resolve the address reliably across game launches despite ASLR:
+
+   [TargetGame.exe + 0x270A78]
+               |
+               v (Read 8-byte pointer from static data section)
+        [Heap Address of Player]
+               |
+               v (+0x10 struct offset)
+        [Player.score Variable]
+
+5. External Tool Implementation (memory_modifcication.cpp)
+--------------------------------------------------------------------------------
+A. Locate Process:
+   - FindWindowA(NULL, "AntiCheat Lab - 3D FPS Arena") -> GetWindowThreadProcessId.
+
+B. Module Base Resolution:
+   - CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid)
+   - Enumerate modules via Module32FirstW / Module32NextW to find TargetGame.exe base.
+
+C. Pointer Dereference & Memory Write:
+   - ReadProcessMemory: [Base + 0x270A78] -> playerHeapAddr
+   - Target Address:    playerHeapAddr + 0x10
+   - WriteProcessMemory: Writes desired score value directly into game memory.

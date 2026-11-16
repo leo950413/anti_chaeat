@@ -1,0 +1,41 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build All (misc_dll.dll & run.exe)",
+            "type": "shell",
+            "command": "cmd.exe",
+            "args": [
+                "/c",
+                "call \"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat\" x64 && cl.exe /LD /EHsc /O2 /Fe:\"${workspaceFolder}\\tools\\misc_dll.dll\" \"${workspaceFolder}\\tools\\misc_dll.cpp\" && cl.exe /EHsc /O2 /Fe:\"${workspaceFolder}\\tools\\run.exe\" \"${workspaceFolder}\\tools\\run.cpp\" && del \"${workspaceFolder}\\*.obj\" \"${workspaceFolder}\\tools\\*.obj\" \"${workspaceFolder}\\tools\\*.exp\" \"${workspaceFolder}\\tools\\*.lib\" 2>nul"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Build misc_dll.dll",
+            "type": "shell",
+            "command": "cmd.exe",
+            "args": [
+                "/c",
+                "call \"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat\" x64 && cl.exe /LD /EHsc /O2 /Fe:\"${workspaceFolder}\\tools\\misc_dll.dll\" \"${workspaceFolder}\\tools\\misc_dll.cpp\" && del \"${workspaceFolder}\\*.obj\" \"${workspaceFolder}\\tools\\*.obj\" \"${workspaceFolder}\\tools\\*.exp\" \"${workspaceFolder}\\tools\\*.lib\" 2>nul"
+            ],
+            "group": "build",
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Build run.exe",
+            "type": "shell",
+            "command": "cmd.exe",
+            "args": [
+                "/c",
+                "call \"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat\" x64 && cl.exe /EHsc /O2 /Fe:\"${workspaceFolder}\\tools\\run.exe\" \"${workspaceFolder}\\tools\\run.cpp\" && del \"${workspaceFolder}\\*.obj\" \"${workspaceFolder}\\tools\\*.obj\" 2>nul"
+            ],
+            "group": "build",
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
